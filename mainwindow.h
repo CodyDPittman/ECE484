@@ -9,7 +9,7 @@
 #include <QGraphicsEffect>
 #include <QShowEvent>
 #include <QtNetwork/QUdpSocket>
-#include <QByteArray>
+#include <QByteArrayList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,13 +23,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    QUdpSocket * socket;
+    QByteArray Data = QByteArray("0000",4);;
+
     QImage changeBrightness(QImage &image, int factor);
     QImage changeContrast(QImage &image, int factor);
     void initSocket();
 
-private slots:
+public slots:
     void on_pushButton_clicked();
-
 
     void on_horizontalSlider_valueChanged(int value);
 
@@ -39,7 +41,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QUdpSocket * socket;
     int min = 0;
     int max = 255;
 };

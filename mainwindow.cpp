@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "myudp.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -37,7 +38,9 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::initSocket()
 {
     socket = new QUdpSocket(this);
-    socket->bind(QHostAddress("100.69.238.186"), 80);
+    socket->bind(QHostAddress("100.69.238.184"), 80);
+
+    //connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 }
 
 
@@ -134,7 +137,8 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
     QImage image;
     QPixmap pix;
-    QByteArray Data;
+
+
 
     image = ui->ogPic->pixmap()->toImage();
     image = changeBrightness(image, value);
@@ -143,10 +147,23 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     ui->label_3->setPixmap(pix);
 
     // Writing the slider value  as a datagram to the board
-    Data.append(QString::number(value));
-    //qDebug() << value;
-    socket->writeDatagram(Data, QHostAddress("100.69.238.186"), 80);
 
+    QString s;
+    s = QString::number(value);
+
+    // Insert string value into the first two bytes
+    Data.insert(0,s);
+
+    // If the value is a single digit number x, format to be 0x
+    if(value < 10)
+    {
+        Data.insert(0, "0");
+    }
+
+    //qDebug() << Data;
+    socket->writeDatagram(Data, QHostAddress("100.69.238.184"), 80);
+    Data.resize(4);
+    qDebug() << Data;
 }
 
 
@@ -155,7 +172,7 @@ void MainWindow::on_horizontalSlider_2_valueChanged(int value)
 {
     QImage image;
     QPixmap pix;
-    QByteArray Data;
+
 
     image = ui->label_2->pixmap()->toImage();
     image = changeContrast(image, value);
@@ -164,11 +181,27 @@ void MainWindow::on_horizontalSlider_2_valueChanged(int value)
     ui->label_3->setPixmap(pix);
 
     // Writing the slider value  as a datagram to the board
-    Data.append(QString::number(value));
-    //qDebug() << value;
-    socket->writeDatagram(Data, QHostAddress("100.69.238.186"), 80);
+
+    QString s;
+    s = QString::number(value);
+
+    // Insert string value into the first two bytes
+    Data.insert(2,s);
+
+    // If the value is a single digit number x, format to be 0x
+    if(value < 10)
+    {
+        Data.insert(2, "0");
+    }
+
+    //qDebug() << Data;
+    socket->writeDatagram(Data, QHostAddress("100.69.238.184"), 80);
+    Data.resize(4);
+    qDebug() << Data;
 
 }
+
+
 
 // Saving the modified image
 void MainWindow::on_pushButton_2_clicked()
