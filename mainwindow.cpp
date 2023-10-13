@@ -137,8 +137,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
     QImage image;
     QPixmap pix;
-
-
+    QString s, temp1, temp2;
 
     image = ui->ogPic->pixmap()->toImage();
     image = changeBrightness(image, value);
@@ -148,19 +147,32 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
     // Writing the slider value  as a datagram to the board
 
-    QString s;
+    // Converting the integer to string for the byte array
     s = QString::number(value);
 
-    // Insert string value into the first two bytes
-    Data.insert(0,s);
+    // Copying the last 2 bytes of the array so they are not lost when inserting new values
+    temp1 = Data[2];
+    temp2 = Data[3];
 
-    // If the value is a single digit number x, format to be 0x
+    // Insert string value into the first two bytes
+    Data.insert(0, s);
+
+    // Replacing the last 2 bytes with the original values
+    Data.insert(2, temp1);
+    Data.insert(3, temp2);
+
+
+    // If the value is a single digit number x, format to be 0X
     if(value < 10)
     {
         Data.insert(0, "0");
+
+        // Replacing the last 2 bytes with the original values
+        Data.insert(2, temp1);
+        Data.insert(3, temp2);
     }
 
-    //qDebug() << Data;
+    // Writing to the board
     socket->writeDatagram(Data, QHostAddress("100.69.238.184"), 80);
     Data.resize(4);
     qDebug() << Data;
@@ -172,7 +184,7 @@ void MainWindow::on_horizontalSlider_2_valueChanged(int value)
 {
     QImage image;
     QPixmap pix;
-
+    QString s;
 
     image = ui->label_2->pixmap()->toImage();
     image = changeContrast(image, value);
@@ -180,27 +192,24 @@ void MainWindow::on_horizontalSlider_2_valueChanged(int value)
     ui->label_2->setPixmap(pix);
     ui->label_3->setPixmap(pix);
 
-    // Writing the slider value  as a datagram to the board
-
-    QString s;
+    // Converting the integer to string for byte array
     s = QString::number(value);
 
-    // Insert string value into the first two bytes
+    // Insert string value into the last two bytes
     Data.insert(2,s);
 
-    // If the value is a single digit number x, format to be 0x
+    // If the value is a single digit number X, format to be 0X
     if(value < 10)
     {
         Data.insert(2, "0");
     }
 
-    //qDebug() << Data;
+    // Writing the slider value  as a datagram to the board
     socket->writeDatagram(Data, QHostAddress("100.69.238.184"), 80);
     Data.resize(4);
     qDebug() << Data;
 
 }
-
 
 
 // Saving the modified image
